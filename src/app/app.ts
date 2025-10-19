@@ -8,7 +8,9 @@ import { Header } from "./layout/header/header";
   template: `
     <app-header />
 
-    <router-outlet />
+    <div class="h-[calc(100vh-64px)] overflow-auto mb-5">
+      <router-outlet />
+    </div>
   `,
   styles: [],
 })
