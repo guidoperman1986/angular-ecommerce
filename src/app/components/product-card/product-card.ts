@@ -41,8 +41,6 @@ import { MatIcon } from '@angular/material/icon';
 })
 export class ProductCard {
   product = input.required<Product>();
-
-
   addToCartClicked = output<Product>();
 
 }

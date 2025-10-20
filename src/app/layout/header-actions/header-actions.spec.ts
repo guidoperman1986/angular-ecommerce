@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HeaderActions } from './header-actions';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 describe('HeaderActions', () => {
   let component: HeaderActions;
@@ -8,7 +9,8 @@ describe('HeaderActions', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderActions]
+      imports: [HeaderActions],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

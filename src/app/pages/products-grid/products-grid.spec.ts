@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ActivatedRoute } from '@angular/router';
 import { ProductsGrid } from './products-grid';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 describe('ProductsGrid', () => {
   let component: ProductsGrid;
@@ -8,7 +10,16 @@ describe('ProductsGrid', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProductsGrid]
+      imports: [ProductsGrid],
+      providers: [
+        provideZonelessChangeDetection(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            params: new BehaviorSubject({ category: 'all' })
+          }
+        }
+      ]
     })
     .compileComponents();
 
@@ -19,5 +30,10 @@ describe('ProductsGrid', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should have mat-nav-list', () => {
+    const navList = fixture.nativeElement.querySelector('mat-nav-list');
+    expect(navList).toBeTruthy();
   });
 });

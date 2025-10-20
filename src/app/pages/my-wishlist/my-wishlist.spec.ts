@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MyWishlist } from './my-wishlist';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 describe('MyWishlist', () => {
   let component: MyWishlist;
@@ -8,7 +9,8 @@ describe('MyWishlist', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MyWishlist]
+      imports: [MyWishlist],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 
