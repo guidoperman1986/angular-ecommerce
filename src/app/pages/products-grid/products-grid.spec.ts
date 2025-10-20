@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { ProductsGrid } from './products-grid';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, SimpleChanges } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 describe('ProductsGrid', () => {
@@ -21,7 +21,7 @@ describe('ProductsGrid', () => {
         }
       ]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(ProductsGrid);
     component = fixture.componentInstance;
@@ -35,5 +35,21 @@ describe('ProductsGrid', () => {
   it('should have mat-nav-list', () => {
     const navList = fixture.nativeElement.querySelector('mat-nav-list');
     expect(navList).toBeTruthy();
+  });
+
+  it('should set category when user changes it', () => {
+    const storeSpy = spyOn(component.store, 'setCategory');
+
+    const changes: SimpleChanges = {
+      category: {
+        currentValue: "home & living",
+        firstChange: false,
+        previousValue: "beauty & skincare",
+        isFirstChange: () => false
+      }
+    };
+
+    component.ngOnChanges(changes);
+    expect(storeSpy).toHaveBeenCalled()
   });
 });
