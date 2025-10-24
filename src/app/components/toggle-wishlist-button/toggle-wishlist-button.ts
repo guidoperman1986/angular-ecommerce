@@ -9,8 +9,8 @@ import { MatIcon } from '@angular/material/icon';
   template: `
   @if (screen() === 'products') {
     <button 
-      class="!absolute z-10 top-3 right-3 w-10 h-10 rounded-full !bg-white border-0 shadowd-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
-      matIconButton        
+      class="!absolute z-10 top-3 right-3 w-10 h-10 rounded-full !bg-white border-0 shadowd-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 small"
+      matIconButton
       [class]="isInWhishlist() ? 'text-red-500' : 'text-gray-400'"
       (click)="toggleWishlist(product())"
     >
@@ -19,7 +19,7 @@ import { MatIcon } from '@angular/material/icon';
   } @else {
     <button 
       class="!absolute z-10 top-3 right-3 w-10 h-10 rounded-full !bg-white border-0 shadowd-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
-      matIconButton        
+      matIconButton
       (click)="store.removeFromWishlist(product().id)"
     >
       <mat-icon>delete</mat-icon>

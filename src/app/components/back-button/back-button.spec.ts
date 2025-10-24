@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BackButton } from './back-button';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
 
 describe('BackButton', () => {
   let component: BackButton;
@@ -8,9 +11,15 @@ describe('BackButton', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BackButton]
+      imports: [BackButton],
+      providers: [provideZonelessChangeDetection(), {
+        provide: ActivatedRoute,
+        useValue: {
+          params: new BehaviorSubject({ category: 'all' })
+        }
+      }]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(BackButton);
     component = fixture.componentInstance;

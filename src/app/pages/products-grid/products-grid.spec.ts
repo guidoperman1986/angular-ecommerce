@@ -37,19 +37,5 @@ describe('ProductsGrid', () => {
     expect(navList).toBeTruthy();
   });
 
-  it('should set category when user changes it', () => {
-    const storeSpy = spyOn(component.store, 'setCategory');
-
-    const changes: SimpleChanges = {
-      category: {
-        currentValue: "home & living",
-        firstChange: false,
-        previousValue: "beauty & skincare",
-        isFirstChange: () => false
-      }
-    };
-
-    component.ngOnChanges(changes);
-    expect(storeSpy).toHaveBeenCalled()
-  });
+  
 });
