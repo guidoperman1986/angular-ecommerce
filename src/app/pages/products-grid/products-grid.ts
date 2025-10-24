@@ -1,26 +1,25 @@
-import { Component, computed, inject, input, OnChanges, signal, SimpleChanges } from '@angular/core';
-import { Product } from '../../models/product';
-import { ProductCard } from "../../components/product-card/product-card";
-import { MatSidenav, MatSidenavContainer, MatSidenavContent } from "@angular/material/sidenav";
-import { MatNavList, MatListItem, MatListItemTitle } from "@angular/material/list";
-import { RouterLink } from '@angular/router';
 import { TitleCasePipe } from '@angular/common';
-import { productStore } from '../../store/product-store';
+import { Component, inject, input } from '@angular/core';
+import { MatListItem, MatListItemTitle, MatNavList } from "@angular/material/list";
+import { MatSidenav, MatSidenavContainer, MatSidenavContent } from "@angular/material/sidenav";
+import { RouterLink } from '@angular/router';
+import { ProductCard } from "../../components/product-card/product-card";
+import { Product } from '../../models/product';
+import { ProductStore } from '../../store/product-store';
 
 @Component({
   selector: 'app-products-grid',
   imports: [
     ProductCard,
     MatSidenav,
-    MatSidenavContainer, 
-    MatSidenavContent, 
-    MatNavList, 
-    MatListItem, 
+    MatSidenavContainer,
+    MatSidenavContent,
+    MatNavList,
+    MatListItem,
     MatListItemTitle,
-    RouterLink, 
-    TitleCasePipe
+    RouterLink,
+    TitleCasePipe,
   ],
-  providers: [productStore],
   template: `
     <mat-sidenav-container>
       <mat-sidenav mode="side" opened="true">
@@ -44,10 +43,7 @@ import { productStore } from '../../store/product-store';
             }
           </mat-nav-list>
         </div>
-
-
       </mat-sidenav>
-
 
       <mat-sidenav-content class="bg-gray-100 p-6 min-h-[calc(100vh-64px)]">        
         <h1 class="text-2xl font-bold text-gray-900 mb-1">
@@ -60,41 +56,34 @@ import { productStore } from '../../store/product-store';
 
         <div class="responsive-grid">
           @for(product of filteredProducts(); track product.id) {
-            <app-product-card [product]="product" (addToCartClicked)="addToCart($event)" />
+            <app-product-card 
+              screen="products" 
+              [product]="product" 
+              (addToCartClicked)="addToCart($event)" 
+            >              
+            </app-product-card>
           }
         </div>
-
-
-
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  styles: `
-
-  
-  `
+  styles: ``
 })
-export class ProductsGrid implements OnChanges {
-  store = inject(productStore);
+export class ProductsGrid {
+  store = inject(ProductStore);
   category = input<string>('all');
 
   categories = this.store.categories;
   products = this.store.products;
   filteredProducts = this.store.filteredProducts;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['category']) {
-      this.store.setCategory(this.category());
-    }
+  constructor() {
+    this.store.setCategory(this.category);
   }
 
   addToCart(product: Product) {
     console.log(`Product added to cart: ${product.name}`);
   }
-
-
-
-
 
 
 }

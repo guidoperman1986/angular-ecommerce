@@ -1,10 +1,13 @@
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals'
+import { inject } from '@angular/core';
+import { patchState, signalMethod, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { Product } from '../models/product';
+import { Toaster } from '../services/toaster';
 
 type ProductState = {
     categories: string[];
     selectedCategory: string;
     products: Product[];
+    wishlistItems: Product[];
 };
 
 
@@ -137,21 +140,36 @@ const initialState: ProductState = {
             inStock: false, // Example of out of stock
             category: 'health & fitness',
         },
-    ]
+    ],
+    wishlistItems: [],
 };
 
-export const productStore = signalStore(
+export const ProductStore = signalStore(
+    { providedIn: 'root' },
     withState(initialState),
-    withComputed(({ products, categories, selectedCategory }) => ({
+    withComputed(({ products, categories, selectedCategory, wishlistItems }) => ({
         filteredProducts: () =>
-            products().filter(product => selectedCategory() === 'all' || product.category === selectedCategory())
+            products().filter(product => selectedCategory() === 'all' || product.category === selectedCategory()),
+        wishlistCount: () => wishlistItems().length,
+        wishlistItems: () => wishlistItems(),
     })
     ),
-    withMethods(store => ({
-        setCategory(category: string) {
-            patchState(store, (state) => ({
-                selectedCategory: category
-            }))
-        }
+    withMethods((store, toaster = inject(Toaster)) => ({
+        setCategory: signalMethod((category: string) => {
+            patchState(store, { selectedCategory: category });
+        }),
+        addToWishlist: signalMethod((product: Product) => {
+            const currentWishlist = store.wishlistItems();
+            if (!currentWishlist.find(item => item.id === product.id)) {
+                const newWishlist = [...currentWishlist, product];                
+                patchState(store, { wishlistItems: newWishlist });
+                toaster.success('Product added to wishlist!');
+            }
+        }),
+        removeFromWishlist: signalMethod((productId: number) => {
+            const updatedWishlist = store.wishlistItems().filter(item => item.id !== productId);
+            patchState(store, { wishlistItems: updatedWishlist });
+            toaster.success('Product removed from wishlist.');
+        })
     }))
 );

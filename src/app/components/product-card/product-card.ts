@@ -1,14 +1,31 @@
-import { Component, input, output } from '@angular/core';
-import { Product } from '../../models/product';
-import { MatAnchor, MatButton } from "@angular/material/button";
+import { Component, inject, input, output } from '@angular/core';
+import { MatButton } from "@angular/material/button";
 import { MatIcon } from '@angular/material/icon';
+import { Product } from '../../models/product';
+import { ProductStore } from '../../store/product-store';
+import { ToggleWishlistButton } from "../toggle-wishlist-button/toggle-wishlist-button";
 
 @Component({
   selector: 'app-product-card',
-  imports: [MatButton, MatIcon],
+  imports: [MatButton, MatIcon, ToggleWishlistButton],
   template: `
-    <div class="bg-white cursor-pointer rounded-xl shadow-lg overflow-hidden flex flex-col h-full">
-      <img [src]="product().imageUrl" class="w-full h-[300px] object-cover rounded-t-xl" alt="">
+    <div class="relative bg-white cursor-pointer rounded-xl shadow-lg overflow-hidden flex flex-col h-full">
+      <img 
+        [src]="product().imageUrl" 
+        class="w-full h-[300px] object-cover rounded-t-xl" 
+        alt=""
+      >
+
+      @if (screen() === 'products') {
+        <app-toggle-wishlist-button 
+          [product]="product()"
+        ></app-toggle-wishlist-button>
+      } @else {
+        <app-toggle-wishlist-button 
+          screen="wishlist" 
+          [product]="product()"
+        ></app-toggle-wishlist-button>
+      }
 
       <div class="p-5 flex flex-col flex-1">
         <h3 class="text-lg font-semibold text-gray-900 mb-2 leading-tight">
@@ -42,5 +59,8 @@ import { MatIcon } from '@angular/material/icon';
 export class ProductCard {
   product = input.required<Product>();
   addToCartClicked = output<Product>();
+  store = inject(ProductStore);
+
+  screen = input<'products' | 'wishlist'>('products');
 
 }
