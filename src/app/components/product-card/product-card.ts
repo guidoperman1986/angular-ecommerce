@@ -46,7 +46,12 @@ import { ToggleWishlistButton } from "../toggle-wishlist-button/toggle-wishlist-
           <span class="text-2xl font-bold text-gray-500">
              \${{ product().price.toFixed(2) }}
           </span>  
-          <button matButton="filled" class="flex items-center gap-2" (click)="addToCartClicked.emit(product())" [disabled]="!product().inStock">
+          <button 
+            matButton="filled" 
+            class="flex items-center gap-2" 
+            (click)="addToCartClicked.emit(product())" 
+            [disabled]="!product().inStock"
+          >
             <mat-icon>shopping_cart</mat-icon>
             Add to Cart
           </button>

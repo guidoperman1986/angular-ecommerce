@@ -20,7 +20,12 @@ import { ProductStore } from '../../store/product-store';
         <mat-icon>favorite</mat-icon>
       </button>
       
-      <button matIconButton routerLink="/cart">
+      <button 
+        matIconButton 
+        routerLink="/cart"
+        [matBadge]="store.cartCount()"
+        [matBadgeHidden]="store.cartCount() === 0"
+      >
         <mat-icon>shopping_cart</mat-icon>
       </button>
       <button matButton>Sign In</button>

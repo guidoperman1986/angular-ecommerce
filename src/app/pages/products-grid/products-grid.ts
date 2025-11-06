@@ -82,7 +82,7 @@ export class ProductsGrid {
   }
 
   addToCart(product: Product) {
-    console.log(`Product added to cart: ${product.name}`);
+    this.store.addToCart(product, 1)
   }
 
 

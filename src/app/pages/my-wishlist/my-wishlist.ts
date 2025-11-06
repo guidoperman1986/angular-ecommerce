@@ -1,12 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { BackButton } from "../../components/back-button/back-button";
-import { ProductStore } from '../../store/product-store';
-import { JsonPipe } from '@angular/common';
 import { ProductCard } from "../../components/product-card/product-card";
+import { ProductStore } from '../../store/product-store';
+import { EmptyWishlist } from "./empty-wishlist/empty-wishlist";
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-my-wishlist',
-  imports: [BackButton, ProductCard],
+  imports: [BackButton, ProductCard, EmptyWishlist, MatButton],
   template: `
     <div class="mx-auto max-w-[1200px] py-6 px-4">
       <app-back-button class="mb-6" navigateTo="/products/all">Continue shopping</app-back-button>
@@ -25,7 +26,17 @@ import { ProductCard } from "../../components/product-card/product-card";
             ></app-product-card>
           }
         </div>
-      }@else {}
+
+        <div class="mt-8 flex justify-center">
+          <button 
+            matButton="outlined"
+            class="danger cursor-pointer" 
+            (click)="store.clearWishList()"
+          >Clear Wishlist</button>
+        </div>
+      }@else {
+        <app-empty-wishlist></app-empty-wishlist>
+      }
 
 
     </div>

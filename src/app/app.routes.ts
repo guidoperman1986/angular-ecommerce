@@ -10,6 +10,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/products-grid/products-grid').then(c => c.ProductsGrid)
     },
     {
+        path: 'cart',
+        loadComponent: () => import('./pages/view-cart/view-cart').then(c => c.ViewCart)
+    },
+    {
         path: '',
         redirectTo: 'products/all',
         pathMatch: 'full'
