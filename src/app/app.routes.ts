@@ -14,6 +14,14 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/view-cart/view-cart').then(c => c.ViewCart)
     },
     {
+        path: 'checkout',
+        loadComponent: () => import('./pages/checkout/checkout').then(c => c.Checkout)
+    },
+    {
+        path: 'order-success',
+        loadComponent: () => import('./pages/order-success/order-success').then(c => c.OrderSuccess)
+    },
+    {
         path: '',
         redirectTo: 'products/all',
         pathMatch: 'full'

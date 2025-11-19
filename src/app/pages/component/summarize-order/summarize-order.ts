@@ -29,6 +29,8 @@ import { CurrencyPipe } from '@angular/common';
         </div>
       </div>
 
+      <ng-content select="[actionButtons]"></ng-content>
+
     </div>
   `,
   styles: ``
