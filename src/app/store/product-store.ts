@@ -7,6 +7,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { SignInDialog } from '../components/sign-in-dialog/sign-in-dialog';
 import { SignInParams, SignUpParams, User } from '../models/user';
 import { Router } from '@angular/router';
+import { Order } from '../models/order';
+import { withStorageSync } from "@angular-architects/ngrx-toolkit";
 
 type ProductState = {
     categories: string[];
@@ -15,6 +17,7 @@ type ProductState = {
     wishlistItems: Product[];
     cartItems: CartItem[];
     user: User | undefined;
+    loading: boolean;
 };
 
 
@@ -151,11 +154,13 @@ const initialState: ProductState = {
     wishlistItems: [],
     cartItems: [],
     user: undefined,
+    loading: false
 };
 
 export const ProductStore = signalStore(
     { providedIn: 'root' },
     withState(initialState),
+    withStorageSync({ key: 'product-store', select: ({ wishlistItems, cartItems, user }) => ({ wishlistItems, cartItems, user }) }),
     withComputed(({ products, categories, selectedCategory, wishlistItems, cartItems }) => ({
         filteredProducts: () =>
             products().filter(product => selectedCategory() === 'all' || product.category === selectedCategory()),
@@ -249,13 +254,16 @@ export const ProductStore = signalStore(
             toaster.success('Product removed from Cart')
         },
         proceedToCheckout: () => {
-            console.log('open')
-            matDialog.open(SignInDialog, {
-                disableClose: true,
-                data: {
-                    checkout: true
-                }
-            })
+            if (!store.user()) {
+                matDialog.open(SignInDialog, {
+                    disableClose: true,
+                    data: {
+                        checkout: true
+                    }
+                })
+            } else {
+                router.navigate(['/checkout']);
+            }
         },
         signIn: ({ email, password, checkout, dialogId }: SignInParams) => {
             patchState(store, {
@@ -293,6 +301,29 @@ export const ProductStore = signalStore(
             patchState(store, {
                 user: undefined
             })
+        },
+        placeOrder: async () => {
+            patchState(store, { loading: true })
+
+            const user = store.user()
+            if (!user) {
+                patchState(store, { loading: false });
+                toaster.error('You must be logged in to place an order')
+                return;
+            }
+
+            const order: Order = {
+                id: crypto.randomUUID(),
+                userId: user.id,
+                items: store.cartItems(),
+                total: Math.round(store.cartItems().reduce((acc, item) => acc + item.product.price * item.quantity, 0)),
+                paymentStatus: 'pending'
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            patchState(store, { loading: false, cartItems: [] })
+            toaster.success('Order placed successfully')
+            router.navigate(['/order-success'])
         }
     }))
 );

@@ -12,7 +12,17 @@ import { SignUpDialog } from '../sign-up-dialog/sign-up-dialog';
 
 @Component({
   selector: 'app-sign-in-dialog',
-  imports: [MatIconButton, MatIcon, MatDialogClose, MatFormField, MatInput, MatPrefix, MatSuffix, ReactiveFormsModule, MatAnchor],
+  imports: [
+    MatIconButton,
+    MatIcon,
+    MatDialogClose,
+    MatFormField,
+    MatInput,
+    MatPrefix,
+    MatSuffix,
+    ReactiveFormsModule,
+    MatAnchor
+  ],
   template: `
     <div class="p-8 max-w-[400px] flex flex-col bg-white rounded-xl">
       <div class="flex justify-between mb-2">
