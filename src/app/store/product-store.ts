@@ -18,6 +18,7 @@ type ProductState = {
     cartItems: CartItem[];
     user: User | undefined;
     loading: boolean;
+    selectedProductId: string | undefined
 };
 
 
@@ -154,19 +155,21 @@ const initialState: ProductState = {
     wishlistItems: [],
     cartItems: [],
     user: undefined,
-    loading: false
+    loading: false,
+    selectedProductId: undefined
 };
 
 export const ProductStore = signalStore(
     { providedIn: 'root' },
     withState(initialState),
     withStorageSync({ key: 'product-store', select: ({ wishlistItems, cartItems, user }) => ({ wishlistItems, cartItems, user }) }),
-    withComputed(({ products, categories, selectedCategory, wishlistItems, cartItems }) => ({
+    withComputed(({ products, categories, selectedCategory, wishlistItems, cartItems, selectedProductId }) => ({
         filteredProducts: () =>
             products().filter(product => selectedCategory() === 'all' || product.category === selectedCategory()),
         wishlistCount: () => wishlistItems().length,
         wishlistItems: () => wishlistItems(),
-        cartCount: () => cartItems().reduce((acc, item) => acc + item.quantity, 0)
+        cartCount: () => cartItems().reduce((acc, item) => acc + item.quantity, 0),
+        selectedProduct: () => selectedProductId() ? products().find(product => product.id === +selectedProductId()!) : undefined
     })
     ),
     withMethods((store, toaster = inject(Toaster), matDialog = inject(MatDialog), router = inject(Router)) => ({
@@ -217,7 +220,7 @@ export const ProductStore = signalStore(
                 if (index === existingIndex) {
                     return {
                         ...item,
-                        quantity: item.quantity + 1
+                        quantity: params.quantity
                     }
                 }
                 return item;
@@ -324,6 +327,9 @@ export const ProductStore = signalStore(
             patchState(store, { loading: false, cartItems: [] })
             toaster.success('Order placed successfully')
             router.navigate(['/order-success'])
-        }
+        },
+        setSelectedProductId: signalMethod((productId: string) => {
+            patchState(store, { selectedProductId: productId })
+        })
     }))
 );

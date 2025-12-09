@@ -11,7 +11,12 @@ import { MatIcon } from "@angular/material/icon";
   template: `
     <div class="grid grid-cols-3 grid-cols-[3fr_1fr_1fr]">
       <div class="flex items-center gap-4">
-        <img [src]="item().product.imageUrl" class="w-24 h-24 rounded-lg object-cover" alt="">
+        <img 
+          [src]="item().product.imageUrl" 
+          class="w-24 h-24 rounded-lg object-cover" 
+          alt=""
+          [style.view-transition-name]="'product-image-'+item().product.id"
+        >
         <div>
           <div class="text-gray-900 text-lg font-semibold">{{item().product.name}}</div>
           <div class="text-gray-600 text-lg">\${{item().product.price}}</div>
@@ -49,6 +54,7 @@ export class ShowCartItem {
   total = computed(() => this.store.cartItems().reduce((acc, item) => acc + item.product.price * item.quantity, 0));
 
   updateQuantity(quantity: number) {
+    console.log(quantity);
     this.store.setItemQuantity({ productId: this.item().product.id, quantity })
   }
 }

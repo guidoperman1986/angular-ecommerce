@@ -59,7 +59,7 @@ import { ProductStore } from '../../store/product-store';
             <app-product-card 
               screen="products" 
               [product]="product" 
-              (addToCartClicked)="addToCart($event)" 
+              (addToCartClicked)="addToCart($event)"               
             >              
             </app-product-card>
           }

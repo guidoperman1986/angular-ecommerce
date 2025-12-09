@@ -4,16 +4,19 @@ import { MatIcon } from '@angular/material/icon';
 import { Product } from '../../models/product';
 import { ProductStore } from '../../store/product-store';
 import { ToggleWishlistButton } from "../toggle-wishlist-button/toggle-wishlist-button";
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-product-card',
-  imports: [MatButton, MatIcon, ToggleWishlistButton],
+  imports: [MatButton, MatIcon, ToggleWishlistButton, RouterLink],
   template: `
-    <div class="relative bg-white cursor-pointer rounded-xl shadow-lg overflow-hidden flex flex-col h-full">
+    <div class="relative bg-white cursor-pointer rounded-xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl">
       <img 
+        routerLink="/product/{{ product().id }}"
         [src]="product().imageUrl" 
         class="w-full h-[300px] object-cover rounded-t-xl" 
         alt=""
+        [style.view-transition-name]="'product-image-'+product().id"
       >
 
       @if (screen() === 'products') {
