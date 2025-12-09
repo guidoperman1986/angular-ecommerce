@@ -1,3 +1,5 @@
+import { UserReview } from "./user-review";
+
 export type Product = {
   id: number;
   name: string;
@@ -8,4 +10,5 @@ export type Product = {
   reviewsCount: number;
   inStock: boolean;
   category: string;
+  reviews: UserReview[];
 };

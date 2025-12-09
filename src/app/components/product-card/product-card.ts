@@ -5,10 +5,11 @@ import { Product } from '../../models/product';
 import { ProductStore } from '../../store/product-store';
 import { ToggleWishlistButton } from "../toggle-wishlist-button/toggle-wishlist-button";
 import { RouterLink } from "@angular/router";
+import { StarRating } from "../star-rating/star-rating";
 
 @Component({
   selector: 'app-product-card',
-  imports: [MatButton, MatIcon, ToggleWishlistButton, RouterLink],
+  imports: [MatButton, MatIcon, ToggleWishlistButton, RouterLink, StarRating],
   template: `
     <div class="relative bg-white cursor-pointer rounded-xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl">
       <img 
@@ -38,10 +39,13 @@ import { RouterLink } from "@angular/router";
         <p class="text-sm text-gray-600 mb-4 flex-1 leading-relaxed">
           {{ product().description }}
         </p>
+        
+        <app-star-rating [rating]="product().rating"> ({{product().reviewsCount }}) </app-star-rating>
 
-        <!-- add rating component -->
-
-        <div class="text-sm font-medium mb-4">
+        <div class="text-sm font-medium mb-4" 
+            [class.text-green-500]="product().inStock" 
+            [class.text-red-500]="!product().inStock"
+        >
           {{ product().inStock ? 'In Stock' : 'Out of Stock' }}
         </div>
 

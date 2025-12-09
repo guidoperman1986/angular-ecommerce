@@ -9,6 +9,7 @@ import { SignInParams, SignUpParams, User } from '../models/user';
 import { Router } from '@angular/router';
 import { Order } from '../models/order';
 import { withStorageSync } from "@angular-architects/ngrx-toolkit";
+import { AddReviewParams, UserReview } from '../models/user-review';
 
 type ProductState = {
     categories: string[];
@@ -18,7 +19,8 @@ type ProductState = {
     cartItems: CartItem[];
     user: User | undefined;
     loading: boolean;
-    selectedProductId: string | undefined
+    selectedProductId: string | undefined;
+    writeReview: boolean;
 };
 
 
@@ -34,10 +36,42 @@ const initialState: ProductState = {
             price: 249.99,
             // Pexels URL for product photo (Headphones)
             imageUrl: 'https://images.pexels.com/photos/1036856/pexels-photo-1036856.jpeg?auto=compress&cs=tinysrgb&w=350',
-            rating: 4.7,
+            rating: 3.7,
             reviewsCount: 354,
             inStock: true,
             category: 'electronics',
+            reviews: [
+                {
+                    id: '101',
+                    productId: 1,
+                    userName: 'Emily R.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
+                    rating: 4,
+                    title: 'Great Sound & ANC',
+                    comment: 'Sound quality is fantastic. Noise canceling works well in office environments.',
+                    reviewDate: new Date('2023-10-10')
+                },
+                {
+                    id: '102',
+                    productId: 1,
+                    userName: 'Michael B.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+                    rating: 5,
+                    title: 'Amazing Battery Life',
+                    comment: 'Battery life is impressive. I can go a whole week without charging.',
+                    reviewDate: new Date('2023-11-05')
+                },
+                {
+                    id: '103',
+                    productId: 1,
+                    userName: 'David K.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/men/12.jpg',
+                    rating: 3,
+                    title: 'Good Comfort, Heavy Bass',
+                    comment: 'Comfortable, but the bass is a bit too heavy for my taste.',
+                    reviewDate: new Date('2023-09-22')
+                }
+            ]
         },
 
         // --- Home Decor (Candle) ---
@@ -52,6 +86,28 @@ const initialState: ProductState = {
             reviewsCount: 512,
             inStock: true,
             category: 'home & living',
+            reviews: [
+                {
+                    id: '201',
+                    productId: 2,
+                    userName: 'Sarah L.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/women/65.jpg',
+                    rating: 5,
+                    title: 'Heavenly Scent',
+                    comment: 'The scent is heavenly! Not too strong, just perfect for a relaxing evening.',
+                    reviewDate: new Date('2023-12-01')
+                },
+                {
+                    id: '202',
+                    productId: 2,
+                    userName: 'Jessica M.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/women/23.jpg',
+                    rating: 4,
+                    title: 'Long Lasting Burn',
+                    comment: 'Burns evenly and lasts a long time. Will buy again.',
+                    reviewDate: new Date('2023-11-15')
+                }
+            ]
         },
 
         // --- Fashion/Apparel (T-Shirt) ---
@@ -66,6 +122,28 @@ const initialState: ProductState = {
             reviewsCount: 201,
             inStock: true,
             category: 'apparel',
+            reviews: [
+                {
+                    id: '301',
+                    productId: 3,
+                    userName: 'Chris P.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/men/55.jpg',
+                    rating: 5,
+                    title: 'Soft & True to Size',
+                    comment: 'Super soft material and the fit is true to size. Great quality t-shirt.',
+                    reviewDate: new Date('2023-10-28')
+                },
+                {
+                    id: '302',
+                    productId: 3,
+                    userName: 'Alex T.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/men/8.jpg',
+                    rating: 4,
+                    title: 'Good Basic Tee',
+                    comment: 'Nice basic tee. Shrunk a tiny bit after the first wash, but still fits.',
+                    reviewDate: new Date('2023-09-05')
+                }
+            ]
         },
 
         // --- Health/Wellness/Beauty (Serum) ---
@@ -80,6 +158,38 @@ const initialState: ProductState = {
             reviewsCount: 789,
             inStock: false, // Example of out of stock
             category: 'beauty & skincare',
+            reviews: [
+                {
+                    id: '401',
+                    productId: 4,
+                    userName: 'Amanda W.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/women/90.jpg',
+                    rating: 5,
+                    title: 'Hydrating & Plumping',
+                    comment: 'My skin feels so much more hydrated and plump. Love this serum!',
+                    reviewDate: new Date('2023-11-20')
+                },
+                {
+                    id: '402',
+                    productId: 4,
+                    userName: 'Rachel G.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/women/33.jpg',
+                    rating: 5,
+                    title: 'Worth the Price',
+                    comment: 'A bit pricey, but totally worth it. The Vitamin C brightens my complexion.',
+                    reviewDate: new Date('2023-10-12')
+                },
+                {
+                    id: '403',
+                    productId: 4,
+                    userName: 'Linda B.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/women/11.jpg',
+                    rating: 4,
+                    title: 'Quick Absorption',
+                    comment: 'Good texture, absorbs quickly.',
+                    reviewDate: new Date('2023-12-05')
+                }
+            ]
         },
 
         // --- Kitchenware/Drinkware (Water Bottle) ---
@@ -94,6 +204,28 @@ const initialState: ProductState = {
             reviewsCount: 125,
             inStock: true,
             category: 'kitchenware',
+            reviews: [
+                {
+                    id: '501',
+                    productId: 5,
+                    userName: 'Mark S.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/men/67.jpg',
+                    rating: 5,
+                    title: 'Stays Cold All Day',
+                    comment: 'Keeps water ice cold all day long, even in the hot sun.',
+                    reviewDate: new Date('2023-08-30')
+                },
+                {
+                    id: '502',
+                    productId: 5,
+                    userName: 'Daniel H.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/men/19.jpg',
+                    rating: 4,
+                    title: 'Durable but Tight Lid',
+                    comment: 'Durable bottle, but the lid can be a bit hard to unscrew sometimes.',
+                    reviewDate: new Date('2023-09-15')
+                }
+            ]
         },
 
         // --- Photography/Accessory (Drone) ---
@@ -108,6 +240,28 @@ const initialState: ProductState = {
             reviewsCount: 88,
             inStock: true,
             category: 'electronics',
+            reviews: [
+                {
+                    id: '601',
+                    productId: 6,
+                    userName: 'TechnologyFan99',
+                    userImageUrl: 'https://randomuser.me/api/portraits/men/99.jpg',
+                    rating: 4,
+                    title: 'Excellent Entry-Level',
+                    comment: 'Great entry-level drone. 4K video is surprisingly good for the price.',
+                    reviewDate: new Date('2023-11-01')
+                },
+                {
+                    id: '602',
+                    productId: 6,
+                    userName: 'Sam V.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/men/4.jpg',
+                    rating: 5,
+                    title: 'Fun & Stable',
+                    comment: 'So much fun to fly! Very stable and easy to control.',
+                    reviewDate: new Date('2023-10-25')
+                }
+            ]
         },
 
         // --- Pet Product (Dog Toy) ---
@@ -122,6 +276,28 @@ const initialState: ProductState = {
             reviewsCount: 154,
             inStock: true,
             category: 'pet products',
+            reviews: [
+                {
+                    id: '701',
+                    productId: 7,
+                    userName: 'Laura P.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/women/52.jpg',
+                    rating: 5,
+                    title: 'Tough Toy',
+                    comment: 'My pitbull loves this toy and hasn\'t destroyed it yet! Very tough.',
+                    reviewDate: new Date('2023-11-10')
+                },
+                {
+                    id: '702',
+                    productId: 7,
+                    userName: 'Kevin O.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/men/45.jpg',
+                    rating: 4,
+                    title: 'Dog Loves It',
+                    comment: 'Good boy loves it.',
+                    reviewDate: new Date('2023-12-02')
+                }
+            ]
         },
 
         // --- Jewelry/Accessory (Ring) ---
@@ -136,6 +312,28 @@ const initialState: ProductState = {
             reviewsCount: 68,
             inStock: true,
             category: 'jewelry',
+            reviews: [
+                {
+                    id: '801',
+                    productId: 8,
+                    userName: 'Sophia L.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/women/29.jpg',
+                    rating: 5,
+                    title: 'Beautiful & Delicate',
+                    comment: 'Beautiful and delicate. Exactly what I was looking for.',
+                    reviewDate: new Date('2023-09-28')
+                },
+                {
+                    id: '802',
+                    productId: 8,
+                    userName: 'Grace Kelly',
+                    userImageUrl: 'https://randomuser.me/api/portraits/women/88.jpg',
+                    rating: 5,
+                    title: 'High Quality',
+                    comment: 'High quality silver, hasn\'t tarnished at all.',
+                    reviewDate: new Date('2023-11-12')
+                }
+            ]
         },
 
         // --- Fitness Equipment (Yoga Mat) ---
@@ -150,12 +348,35 @@ const initialState: ProductState = {
             reviewsCount: 92,
             inStock: false, // Example of out of stock
             category: 'health & fitness',
+            reviews: [
+                {
+                    id: '901',
+                    productId: 9,
+                    userName: 'YogiBear',
+                    userImageUrl: 'https://randomuser.me/api/portraits/men/60.jpg',
+                    rating: 5,
+                    title: 'Superior Grip',
+                    comment: 'Best grip I have ever had on a mat. No slipping during downward dog.',
+                    reviewDate: new Date('2023-10-05')
+                },
+                {
+                    id: '902',
+                    productId: 9,
+                    userName: 'Chloe D.',
+                    userImageUrl: 'https://randomuser.me/api/portraits/women/70.jpg',
+                    rating: 3,
+                    title: 'Great Cushioning',
+                    comment: 'It is a bit heavy to carry around, but the cushioning is great.',
+                    reviewDate: new Date('2023-11-18')
+                }
+            ]
         },
     ],
     wishlistItems: [],
     cartItems: [],
     user: undefined,
     loading: false,
+    writeReview: false,
     selectedProductId: undefined
 };
 
@@ -330,6 +551,49 @@ export const ProductStore = signalStore(
         },
         setSelectedProductId: signalMethod((productId: string) => {
             patchState(store, { selectedProductId: productId })
-        })
+        }),
+        setWriteReview: signalMethod((writeReview: boolean) => {
+            patchState(store, { writeReview })
+        }),
+        addReview: async (reviewParams: AddReviewParams) => {
+            patchState(store, { loading: true })
+
+            const user = store.user()
+            if (!user) {
+                patchState(store, { loading: false });
+                toaster.error('You must be logged in to add a review')
+                return;
+            }
+
+            const product = store.products().find(product => product.id === +store.selectedProductId()!)
+            if (!product) {
+                patchState(store, { loading: false });
+                toaster.error('Product not found')
+                return;
+            }
+
+            const review: UserReview = {
+                userName: user.name,
+                userImageUrl: user.imageUrl,
+                id: crypto.randomUUID(),
+                productId: product.id,
+                ...reviewParams,
+                reviewDate: new Date()
+            }
+
+            const updatedProducts = store.products().map(product => {
+                if (product.id === +store.selectedProductId()!) {
+                    return {
+                        ...product,
+                        reviews: [...product.reviews, review]
+                    };
+                }
+                return product;
+            })
+
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            patchState(store, { products: updatedProducts, loading: false, writeReview: false });
+            toaster.success('Review added successfully');
+        }
     }))
 );
