@@ -6,17 +6,19 @@ import { ProductStore } from '../../store/product-store';
 import { ToggleWishlistButton } from "../toggle-wishlist-button/toggle-wishlist-button";
 import { RouterLink } from "@angular/router";
 import { StarRating } from "../star-rating/star-rating";
+import { ImageFallback } from '../../directives/image-fallback';
 
 @Component({
   selector: 'app-product-card',
-  imports: [MatButton, MatIcon, ToggleWishlistButton, RouterLink, StarRating],
+  imports: [MatButton, MatIcon, ToggleWishlistButton, RouterLink, StarRating, ImageFallback],
   template: `
     <div class="relative bg-white cursor-pointer rounded-xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl">
       <img 
         routerLink="/product/{{ product().id }}"
-        [src]="product().imageUrl" 
+        [src]="product().imageUrl"
+        [appImageFallback]="'/no-image.jpg'"
         class="w-full h-[300px] object-cover rounded-t-xl" 
-        alt=""
+        alt=""  
         [style.view-transition-name]="'product-image-'+product().id"
       >
 
