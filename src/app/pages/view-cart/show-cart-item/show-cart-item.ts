@@ -4,16 +4,18 @@ import { QtySelector } from "../../../components/qty-selector/qty-selector";
 import { ProductStore } from '../../../store/product-store';
 import { MatIconButton } from "@angular/material/button";
 import { MatIcon } from "@angular/material/icon";
+import { ImageFallback } from '../../../directives/image-fallback';
 
 @Component({
   selector: 'app-show-cart-item',
-  imports: [QtySelector, MatIconButton, MatIcon],
+  imports: [QtySelector, MatIconButton, MatIcon, ImageFallback],
   template: `
     <div class="grid grid-cols-3 grid-cols-[3fr_1fr_1fr]">
       <div class="flex items-center gap-4">
         <img 
           [src]="item().product.imageUrl" 
           class="w-24 h-24 rounded-lg object-cover" 
+          [appImageFallback]="'/no-image.jpg'"
           alt=""
           [style.view-transition-name]="'product-image-'+item().product.id"
         >

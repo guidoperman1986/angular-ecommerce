@@ -6,9 +6,9 @@ import { Header } from "./layout/header/header";
   selector: 'app-root',
   imports: [RouterOutlet, Header],
   template: `
-    <app-header />
+    <app-header class="sticky top-0 z-50 block" />
 
-    <div class="h-[calc(100vh-64px)] overflow-auto mb-5">
+    <div class="mb-5 min-h-[calc(100vh-64px)]">
       <router-outlet />
     </div>
   `,

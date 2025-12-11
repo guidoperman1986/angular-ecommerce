@@ -3,19 +3,21 @@ import { ProductStore } from '../../store/product-store';
 import { BackButton } from "../../components/back-button/back-button";
 import { ProductInfo } from "./product-info/product-info";
 import { ViewReviews } from "./view-reviews/view-reviews";
+import { ImageFallback } from "../../directives/image-fallback";
 
 @Component({
   selector: 'app-view-product-detail',
-  imports: [BackButton, ProductInfo, ViewReviews],
+  imports: [BackButton, ProductInfo, ViewReviews, ImageFallback],
   template: `
     <div class="mx-auto max-w-[1200px] py-6">
-      <app-back-button class="mb-6" [navigateTo]="backRoute()">Back to Cart</app-back-button>
+      <app-back-button class="mb-6" [navigateTo]  ="backRoute()">Back to Cart</app-back-button>
 
       @if (store.selectedProduct(); as product) {
         <div class="flex gap-6 mb-8">
           <img 
             [src]="product.imageUrl" 
             alt="" 
+            [appImageFallback]="'/no-image.jpg'"
             class="w-[500px] h-[500px] object-cover rounded-lg" 
             [style.view-transition-name]="'product-image-'+product.id"
           >
