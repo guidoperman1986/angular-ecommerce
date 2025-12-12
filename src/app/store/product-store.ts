@@ -1,15 +1,15 @@
-import { inject } from '@angular/core';
-import { patchState, signalMethod, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { Product } from '../models/product';
-import { Toaster } from '../services/toaster';
-import { CartItem } from '../models/cart';
-import { MatDialog } from '@angular/material/dialog';
-import { SignInDialog } from '../components/sign-in-dialog/sign-in-dialog';
-import { SignInParams, SignUpParams, User } from '../models/user';
-import { Router } from '@angular/router';
-import { Order } from '../models/order';
 import { withStorageSync } from "@angular-architects/ngrx-toolkit";
+import { inject } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
+import { patchState, signalMethod, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { SignInDialog } from '../components/sign-in-dialog/sign-in-dialog';
+import { CartItem } from '../models/cart';
+import { Order } from '../models/order';
+import { Product } from '../models/product';
 import { AddReviewParams, UserReview } from '../models/user-review';
+import { Toaster } from '../services/toaster';
+import { UserStore } from './user-store';
 
 type ProductState = {
     categories: string[];
@@ -17,7 +17,6 @@ type ProductState = {
     products: Product[];
     wishlistItems: Product[];
     cartItems: CartItem[];
-    user: User | undefined;
     loading: boolean;
     selectedProductId: string | undefined;
     writeReview: boolean;
@@ -374,7 +373,6 @@ const initialState: ProductState = {
     ],
     wishlistItems: [],
     cartItems: [],
-    user: undefined,
     loading: false,
     writeReview: false,
     selectedProductId: undefined
@@ -383,7 +381,7 @@ const initialState: ProductState = {
 export const ProductStore = signalStore(
     { providedIn: 'root' },
     withState(initialState),
-    withStorageSync({ key: 'product-store', select: ({ wishlistItems, cartItems, user }) => ({ wishlistItems, cartItems, user }) }),
+    withStorageSync({ key: 'product-store', select: ({ wishlistItems, cartItems }) => ({ wishlistItems, cartItems }) }),
     withComputed(({ products, categories, selectedCategory, wishlistItems, cartItems, selectedProductId }) => ({
         filteredProducts: () =>
             products().filter(product => selectedCategory() === 'all' || product.category === selectedCategory()),
@@ -393,207 +391,175 @@ export const ProductStore = signalStore(
         selectedProduct: () => selectedProductId() ? products().find(product => product.id === +selectedProductId()!) : undefined
     })
     ),
-    withMethods((store, toaster = inject(Toaster), matDialog = inject(MatDialog), router = inject(Router)) => ({
-        setCategory: signalMethod((category: string) => {
-            patchState(store, { selectedCategory: category });
-        }),
-        addToWishlist: signalMethod((product: Product) => {
-            const currentWishlist = store.wishlistItems();
-            if (!currentWishlist.find(item => item.id === product.id)) {
-                const newWishlist = [...currentWishlist, product];
-                patchState(store, { wishlistItems: newWishlist });
-                toaster.success('Product added to wishlist!');
-            }
-        }),
-        removeFromWishlist: signalMethod((productId: number) => {
-            const updatedWishlist = store.wishlistItems().filter(item => item.id !== productId);
-            patchState(store, { wishlistItems: updatedWishlist });
-            toaster.success('Product removed from wishlist.');
-        }),
-        clearWishList: () => {
-            patchState(store, { wishlistItems: [] })
-        },
-        addToCart: (product: Product, quantity = 1) => {
-            const existingItemIndex = store.cartItems().findIndex(item => item.product.id === product.id);
-            if (existingItemIndex !== -1) {
+    withMethods((
+        store,
+        toaster = inject(Toaster),
+        matDialog = inject(MatDialog),
+        router = inject(Router),
+        userStore = inject(UserStore)) => ({
+            setCategory: signalMethod((category: string) => {
+                patchState(store, { selectedCategory: category });
+            }),
+            addToWishlist: signalMethod((product: Product) => {
+                const currentWishlist = store.wishlistItems();
+                if (!currentWishlist.find(item => item.id === product.id)) {
+                    const newWishlist = [...currentWishlist, product];
+                    patchState(store, { wishlistItems: newWishlist });
+                    toaster.success('Product added to wishlist!');
+                }
+            }),
+            removeFromWishlist: signalMethod((productId: number) => {
+                const updatedWishlist = store.wishlistItems().filter(item => item.id !== productId);
+                patchState(store, { wishlistItems: updatedWishlist });
+                toaster.success('Product removed from wishlist.');
+            }),
+            clearWishList: () => {
+                patchState(store, { wishlistItems: [] })
+            },
+            addToCart: (product: Product, quantity = 1) => {
+                const existingItemIndex = store.cartItems().findIndex(item => item.product.id === product.id);
+                if (existingItemIndex !== -1) {
+                    const updatedCartItems = store.cartItems().map((item, index) => {
+                        if (index === existingItemIndex) {
+                            return {
+                                ...item,
+                                quantity: item.quantity + 1
+                            }
+                        }
+                        return item;
+                    })
+
+                    patchState(store, { cartItems: updatedCartItems })
+                } else {
+                    patchState(store, { cartItems: [...store.cartItems(), { product, quantity }] })
+
+                }
+                toaster.success(existingItemIndex === -1 ? 'Product added to the cart' : 'The product quantity was updated');
+                console.log(store.cartItems());
+            },
+            setItemQuantity: (params: { productId: number, quantity: number }) => {
+                const existingIndex = store.cartItems().findIndex(item => item.product.id === params.productId)
+
                 const updatedCartItems = store.cartItems().map((item, index) => {
-                    if (index === existingItemIndex) {
+                    if (index === existingIndex) {
                         return {
                             ...item,
-                            quantity: item.quantity + 1
+                            quantity: params.quantity
                         }
                     }
                     return item;
                 })
 
                 patchState(store, { cartItems: updatedCartItems })
-            } else {
-                patchState(store, { cartItems: [...store.cartItems(), { product, quantity }] })
+            },
+            addAllWishListToCart: () => {
+                let notExistingItemsOnCart: CartItem[] = []
+                for (const wishItem of store.wishlistItems()) {
+                    const existingItemOnCart = store.cartItems().findIndex(item => item.product.id === wishItem.id) !== -1
 
-            }
-            toaster.success(existingItemIndex === -1 ? 'Product added to the cart' : 'The product quantity was updated');
-            console.log(store.cartItems());
-        },
-        setItemQuantity: (params: { productId: number, quantity: number }) => {
-            const existingIndex = store.cartItems().findIndex(item => item.product.id === params.productId)
-
-            const updatedCartItems = store.cartItems().map((item, index) => {
-                if (index === existingIndex) {
-                    return {
-                        ...item,
-                        quantity: params.quantity
+                    if (!existingItemOnCart) {
+                        notExistingItemsOnCart.push({ product: wishItem, quantity: 1 });
                     }
                 }
-                return item;
-            })
 
-            patchState(store, { cartItems: updatedCartItems })
-        },
-        addAllWishListToCart: () => {
-            let notExistingItemsOnCart: CartItem[] = []
-            for (const wishItem of store.wishlistItems()) {
-                const existingItemOnCart = store.cartItems().findIndex(item => item.product.id === wishItem.id) !== -1
+                patchState(store, { cartItems: [...store.cartItems(), ...notExistingItemsOnCart] })
+                patchState(store, { wishlistItems: [] })
 
-                if (!existingItemOnCart) {
-                    notExistingItemsOnCart.push({ product: wishItem, quantity: 1 });
+                toaster.success('All elements were added to your cart!')
+            },
+            moveToWishlist: (product: Product) => {
+                const productExistsOnWishlist = store.wishlistItems().find(item => item.id === product.id);
+                if (productExistsOnWishlist) return;
+
+                patchState(store, { wishlistItems: [...store.wishlistItems(), product] })
+                toaster.success('Product moved to Wishlist')
+            },
+            deleteFromCart: (productId: number) => {
+                const updatedCartItems = store.cartItems().filter(item => item.product.id !== productId)
+                patchState(store, { cartItems: updatedCartItems });
+
+                toaster.success('Product removed from Cart')
+            },
+            proceedToCheckout: () => {
+                if (!userStore.user()) {
+                    matDialog.open(SignInDialog, {
+                        disableClose: true,
+                        data: {
+                            checkout: true
+                        }
+                    })
+                } else {
+                    router.navigate(['/checkout']);
                 }
-            }
+            },
+            placeOrder: async () => {
+                patchState(store, { loading: true })
 
-            patchState(store, { cartItems: [...store.cartItems(), ...notExistingItemsOnCart] })
-            patchState(store, { wishlistItems: [] })
+                const user = userStore.user()
+                if (!user) {
+                    patchState(store, { loading: false });
+                    toaster.error('You must be logged in to place an order')
+                    return;
+                }
 
-            toaster.success('All elements were added to your cart!')
-        },
-        moveToWishlist: (product: Product) => {
-            const productExistsOnWishlist = store.wishlistItems().find(item => item.id === product.id);
-            if (productExistsOnWishlist) return;
+                const order: Order = {
+                    id: crypto.randomUUID(),
+                    userId: user.id,
+                    items: store.cartItems(),
+                    total: Math.round(store.cartItems().reduce((acc, item) => acc + item.product.price * item.quantity, 0)),
+                    paymentStatus: 'pending'
+                }
 
-            patchState(store, { wishlistItems: [...store.wishlistItems(), product] })
-            toaster.success('Product moved to Wishlist')
-        },
-        deleteFromCart: (productId: number) => {
-            const updatedCartItems = store.cartItems().filter(item => item.product.id !== productId)
-            patchState(store, { cartItems: updatedCartItems });
+                await new Promise(resolve => setTimeout(resolve, 2000))
+                patchState(store, { loading: false, cartItems: [] })
+                toaster.success('Order placed successfully')
+                router.navigate(['/order-success'])
+            },
+            setSelectedProductId: signalMethod((productId: string) => {
+                patchState(store, { selectedProductId: productId })
+            }),
+            setWriteReview: signalMethod((writeReview: boolean) => {
+                patchState(store, { writeReview })
+            }),
+            addReview: async (reviewParams: AddReviewParams) => {
+                patchState(store, { loading: true })
 
-            toaster.success('Product removed from Cart')
-        },
-        proceedToCheckout: () => {
-            if (!store.user()) {
-                matDialog.open(SignInDialog, {
-                    disableClose: true,
-                    data: {
-                        checkout: true
+                const user = userStore.user()
+                if (!user) {
+                    patchState(store, { loading: false });
+                    toaster.error('You must be logged in to add a review')
+                    return;
+                }
+
+                const product = store.products().find(product => product.id === +store.selectedProductId()!)
+                if (!product) {
+                    patchState(store, { loading: false });
+                    toaster.error('Product not found')
+                    return;
+                }
+
+                const review: UserReview = {
+                    userName: user.name,
+                    userImageUrl: user.imageUrl,
+                    id: crypto.randomUUID(),
+                    productId: product.id,
+                    ...reviewParams,
+                    reviewDate: new Date()
+                }
+
+                const updatedProducts = store.products().map(product => {
+                    if (product.id === +store.selectedProductId()!) {
+                        return {
+                            ...product,
+                            reviews: [...product.reviews, review]
+                        };
                     }
+                    return product;
                 })
-            } else {
-                router.navigate(['/checkout']);
+
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                patchState(store, { products: updatedProducts, loading: false, writeReview: false });
+                toaster.success('Review added successfully');
             }
-        },
-        signIn: ({ email, password, checkout, dialogId }: SignInParams) => {
-            patchState(store, {
-                user: {
-                    id: '1',
-                    email,
-                    name: 'John Doe',
-                    imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg'
-                }
-            })
-
-            matDialog.getDialogById(dialogId)?.close();
-
-            if (checkout) {
-                router.navigate(['/checkout']);
-            }
-        },
-        signUp: ({ email, password, name, checkout, dialogId }: SignUpParams) => {
-            patchState(store, {
-                user: {
-                    id: '1',
-                    email,
-                    name: 'John Doe',
-                    imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg'
-                }
-            })
-
-            matDialog.getDialogById(dialogId)?.close();
-
-            if (checkout) {
-                router.navigate(['/checkout']);
-            }
-        },
-        signOut: () => {
-            patchState(store, {
-                user: undefined
-            })
-        },
-        placeOrder: async () => {
-            patchState(store, { loading: true })
-
-            const user = store.user()
-            if (!user) {
-                patchState(store, { loading: false });
-                toaster.error('You must be logged in to place an order')
-                return;
-            }
-
-            const order: Order = {
-                id: crypto.randomUUID(),
-                userId: user.id,
-                items: store.cartItems(),
-                total: Math.round(store.cartItems().reduce((acc, item) => acc + item.product.price * item.quantity, 0)),
-                paymentStatus: 'pending'
-            }
-
-            await new Promise(resolve => setTimeout(resolve, 2000))
-            patchState(store, { loading: false, cartItems: [] })
-            toaster.success('Order placed successfully')
-            router.navigate(['/order-success'])
-        },
-        setSelectedProductId: signalMethod((productId: string) => {
-            patchState(store, { selectedProductId: productId })
-        }),
-        setWriteReview: signalMethod((writeReview: boolean) => {
-            patchState(store, { writeReview })
-        }),
-        addReview: async (reviewParams: AddReviewParams) => {
-            patchState(store, { loading: true })
-
-            const user = store.user()
-            if (!user) {
-                patchState(store, { loading: false });
-                toaster.error('You must be logged in to add a review')
-                return;
-            }
-
-            const product = store.products().find(product => product.id === +store.selectedProductId()!)
-            if (!product) {
-                patchState(store, { loading: false });
-                toaster.error('Product not found')
-                return;
-            }
-
-            const review: UserReview = {
-                userName: user.name,
-                userImageUrl: user.imageUrl,
-                id: crypto.randomUUID(),
-                productId: product.id,
-                ...reviewParams,
-                reviewDate: new Date()
-            }
-
-            const updatedProducts = store.products().map(product => {
-                if (product.id === +store.selectedProductId()!) {
-                    return {
-                        ...product,
-                        reviews: [...product.reviews, review]
-                    };
-                }
-                return product;
-            })
-
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            patchState(store, { products: updatedProducts, loading: false, writeReview: false });
-            toaster.success('Review added successfully');
-        }
-    }))
+        }))
 );

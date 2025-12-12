@@ -9,6 +9,7 @@ import { MatDivider } from "@angular/material/divider";
 import { MatDialog } from '@angular/material/dialog';
 import { SignInDialog } from '../../components/sign-in-dialog/sign-in-dialog';
 import { SignUpDialog } from '../../components/sign-up-dialog/sign-up-dialog';
+import { UserStore } from '../../store/user-store';
 
 @Component({
   selector: 'app-header-actions',
@@ -34,7 +35,7 @@ import { SignUpDialog } from '../../components/sign-up-dialog/sign-up-dialog';
         <mat-icon>shopping_cart</mat-icon>
       </button>
 
-      @if (store.user(); as user) {
+      @if (userStore.user(); as user) {
         <button matIconButton [matMenuTriggerFor]="userMenu">
           <img [src]="user?.imageUrl" [alt]="user.name" class="w-8 h-8 rounded-full">
         </button>
@@ -45,7 +46,7 @@ import { SignUpDialog } from '../../components/sign-up-dialog/sign-up-dialog';
             <span class="text-xs text-gray-500">{{user.email}}</span>
           </div>
           <mat-divider></mat-divider>
-          <button class="!min-h-[32px] flex items-center ml-3" mat-menu-item (click)="store.signOut()">
+          <button class="!min-h-[32px] flex items-center ml-3" mat-menu-item (click)="userStore.signOut()">
             <mat-icon>logout</mat-icon>
             Sign Out
           </button>
@@ -63,6 +64,7 @@ import { SignUpDialog } from '../../components/sign-up-dialog/sign-up-dialog';
 })
 export class HeaderActions {
   store = inject(ProductStore);
+  userStore = inject(UserStore);
   dialog = inject(MatDialog);
 
   openSignUpDialog() {
@@ -70,7 +72,7 @@ export class HeaderActions {
       disableClose: true
     })
   }
-  
+
   openSignInDialog() {
     this.dialog.open(SignInDialog, {
       disableClose: true

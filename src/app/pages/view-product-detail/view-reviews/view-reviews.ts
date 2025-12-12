@@ -6,6 +6,7 @@ import { ViewReviewItem } from "../view-review-item/view-review-item";
 import { MatAnchor } from "@angular/material/button";
 import { ProductStore } from '../../../store/product-store';
 import { WriteReview } from "../write-review/write-review";
+import { UserStore } from '../../../store/user-store';
 
 @Component({
   selector: 'app-view-reviews',
@@ -14,7 +15,7 @@ import { WriteReview } from "../write-review/write-review";
     <div appViewPanel>
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Customer Reviews</h2>
-        @if (store.user()) {
+        @if (userStore.user()) {
 
           <button 
             matButton="filled" 
@@ -41,5 +42,6 @@ import { WriteReview } from "../write-review/write-review";
 export class ViewReviews {
   product = input.required<Product>();
   store = inject(ProductStore);
+  userStore = inject(UserStore);
   orderedReviews = computed(() => [...this.product().reviews].sort((a, b) => b.reviewDate.getTime() - a.reviewDate.getTime()));
 }

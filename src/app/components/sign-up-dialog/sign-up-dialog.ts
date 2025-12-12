@@ -9,6 +9,7 @@ import { MatInput } from '@angular/material/input';
 import { SignUpParams } from '../../models/user';
 import { ProductStore } from '../../store/product-store';
 import { SignInDialog } from '../sign-in-dialog/sign-in-dialog';
+import { UserStore } from '../../store/user-store';
 
 @Component({
   selector: 'app-sign-up-dialog',
@@ -73,7 +74,7 @@ import { SignInDialog } from '../sign-in-dialog/sign-in-dialog';
   styles: ``
 })
 export class SignUpDialog {
-  store = inject(ProductStore)
+  userStore = inject(UserStore);
   fb = inject(NonNullableFormBuilder);
   signUpForm = this.fb.group({
     name: ['John D', Validators.required],
@@ -92,9 +93,9 @@ export class SignUpDialog {
       return;
     }
 
-    const { email, password } = this.signUpForm.value;
+    const { email, password, name } = this.signUpForm.value;
 
-    this.store.signUp({ email, password, checkout: this.data?.checkout, dialogId: this.dialogRef.id } as SignUpParams);
+    this.userStore.signUp({ email, password, name, checkout: this.data?.checkout, dialogId: this.dialogRef.id } as SignUpParams);
   }
 
   openSignInDialog() {
